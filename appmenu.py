@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import appindicator
-import notify2
 import gtk
 import os
 from build_cache import Cache
@@ -19,7 +18,7 @@ class Indicator:
         self.appcache=appcache
         self.build_menu()
         self.a.set_menu(self.menu)
-        self.running_processes=[]
+        # self.running_processes=[]
 
     def build_menu(self):        
         for category,programs in sorted(self.appcache.items()):
@@ -47,11 +46,12 @@ class Indicator:
 
         print executable
         if program.get('terminal')=='false':
-            pid=subprocess.Popen(executable)
+            pid=subprocess.Popen(executable,shell=True)
+                   
         else:
             print 'terminal'
             pid=subprocess.Popen(['gnome-terminal', '-x', executable])
-        self.running_processes.append(pid)
+        # self.running_processes.append(pid)
 
 
 

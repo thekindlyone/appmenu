@@ -5,7 +5,7 @@ import pickle
 class Cache:
     def __init__(self):
         self.appdir='/usr/share/applications'       
-        self.cachefile='appmenu_cache'
+        self.cachefile='appmenu_cache.p'
         self.parser=RawConfigParser()
         if not os.path.exists(self.cachefile):
             # print 'test'
@@ -22,7 +22,7 @@ class Cache:
 
 
     def fetch_metadata(self,filename):
-        print filename
+        # print filename
         self.parser.read(os.path.join(self.appdir,filename))
         fields=['name','comment','icon','terminal','categories','exec']
         # print {field:get_field(filename,field) for field in fields}
@@ -49,7 +49,7 @@ class Cache:
             else:
                 categories=['misc']
             for category in categories:
-                print category
+                # print category
                 # master_table[category]=master_table.get(category,[])+fields
                 master_table.setdefault(category, []).append(fields)
 
@@ -64,7 +64,7 @@ class Cache:
         try:
             with open(self.cachefile) as f:
                 master_table=pickle.load(f)
-                print 'load success'
+                # print 'load success'
         except:
             return self.create_cache()
 
