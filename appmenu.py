@@ -11,28 +11,74 @@ cwd = os.getcwd()
 
 class Indicator:
 
-    def __init__(self,appcache):
+    def __init__(self,cache):
         self.a = appindicator.Indicator('appmenu', os.path.join(cwd,'appmenu.png'), appindicator.CATEGORY_APPLICATION_STATUS)
         self.a.set_status( appindicator.STATUS_ACTIVE )
-        self.menu=gtk.Menu()
-        self.appcache=appcache
-        self.build_menu()
-        self.a.set_menu(self.menu)
-        # self.running_processes=[]
+        self.cache=cache
+        cachedict=self.cache.get_cache()
+        self.appdict=cachedict.get('appcache')
+        self.applist=cachedict.get('allprograms')
+        self.build_menu()       
 
-    def build_menu(self):        
-        for category,programs in sorted(self.appcache.items()):
+        
+    def lookupIcon(self,icon_name):
+        icon_theme = gtk.icon_theme_get_default()
+        icon = icon_theme.lookup_icon(icon_name, 48, 0)
+        if icon:
+            return icon.get_filename()
+        else:
+            return icon_theme.lookup_icon('gnome-terminal', 48, 0).get_filename()
+
+    def rescan(self,item):
+        cachedict=self.cache.create_cache()
+        self.appdict=cachedict.get('appcache')
+        self.applist=cachedict.get('allprograms')
+        # self.appdict=self.cache.get_cache()
+        self.build_menu()
+
+    def build_menu(self):
+        self.menu=gtk.Menu()       
+        rescanitem=gtk.MenuItem('Rebuild Cache')
+        rescanitem.connect('activate',self.rescan)
+        self.menu.append(rescanitem)
+        rescanitem.show()
+        allprogramsitem=gtk.MenuItem('All Programs')
+        self.menu.append(allprogramsitem)
+        allprograms=self.applist
+        sepitem=gtk.SeparatorMenuItem()
+        self.menu.append(sepitem)
+        sepitem.show()
+        for category,programs in sorted(self.appdict.items()):
             categoryitem=gtk.MenuItem(category)
             categorymenu=gtk.Menu()
             categoryitem.set_submenu(categorymenu)
             self.menu.append(categoryitem)
             categoryitem.show()
+            # allprograms.update(programs)
             for program in programs:
                 name=program.get('name')
-                programitem=gtk.MenuItem(name)
+                programitem=gtk.ImageMenuItem(name)
+                img = gtk.Image()
+                img.set_from_file(self.lookupIcon(program.get('icon')))
+                programitem.set_image(img)
                 programitem.connect('activate',self.runProgram,program)
                 categorymenu.append(programitem)
                 programitem.show()
+        # allprograms=sorted(list(allprograms))
+        allprogramsmenu=gtk.Menu()
+        allprogramsitem.set_submenu(allprogramsmenu)
+        for program in allprograms:
+            name=program.get('name')
+            programitem=gtk.ImageMenuItem(name)
+            img = gtk.Image()
+            img.set_from_file(self.lookupIcon(program.get('icon')))
+            programitem.set_image(img)
+            programitem.connect('activate',self.runProgram,program)
+            allprogramsmenu.append(programitem)
+            programitem.show()
+
+        allprogramsitem.show()
+        self.a.set_menu(self.menu)
 
     def cleanup(self,executable):
         found_list=re.findall('%.',executable)
@@ -42,8 +88,8 @@ class Indicator:
         return cleaned
 
     def runProgram(self,item,program):
+        # print self.lookupIcon(program.get('icon'))
         executable=self.cleanup(program.get('exec'))
-
         print executable
         if program.get('terminal')=='false':
             pid=subprocess.Popen(executable,shell=True)
@@ -57,8 +103,8 @@ class Indicator:
 
 
 def main():
-    appcache=Cache()
-    indicator=Indicator(appcache.get_cache())
+    cache=Cache()
+    indicator=Indicator(cache)
     gtk.main()
 
 if __name__ == '__main__':

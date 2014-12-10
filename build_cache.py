@@ -38,10 +38,12 @@ class Cache:
     def create_cache(self):
         # print os.listdir(self.appdir) 
         master_table={}
+        allprograms=[]
         dicts=(self.fetch_metadata(filename) for filename in os.listdir(self.appdir) 
                if os.path.splitext(filename)[-1]=='.desktop')
         # print list(dicts)
         for fields in dicts:
+            allprograms.append(fields)
             # print fields
             categories=fields.get('categories')
             if categories:
@@ -53,22 +55,24 @@ class Cache:
                 # master_table[category]=master_table.get(category,[])+fields
                 master_table.setdefault(category, []).append(fields)
 
+        allprograms=sorted(allprograms,key=lambda program:program['name'])
         master_table=self.sortify(master_table)
+        final_cache={'appcache':master_table,'allprograms':allprograms}
         # print master_table
         with open(self.cachefile,'w') as f:
-            pickle.dump(master_table,f)
-        return master_table
+            pickle.dump(final_cache,f)
+        return final_cache
 
 
     def load_cache(self):
         try:
             with open(self.cachefile) as f:
-                master_table=pickle.load(f)
+                final_cache=pickle.load(f)
                 # print 'load success'
         except:
             return self.create_cache()
 
-        return master_table
+        return final_cache
 
     def get_cache(self):
         return self.load_cache()
