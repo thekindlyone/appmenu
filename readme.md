@@ -1,10 +1,9 @@
 # Appmenu - a start menu like program menu for ubuntu
 
 ##Dependencies:
-python-appindicator,python-gio,python-gmenu       
+python-appindicator,python-gmenu       
 to install via apt,       
 ```sudo apt-get install python-appindicator```         
-```sudo apt-get install python-gio```        
 ```sudo apt-get install python-gmenu```         
 ##Instructions
 1. enable icons in menus by running     
