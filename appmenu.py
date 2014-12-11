@@ -12,7 +12,7 @@ cwd = os.getcwd()
 class Indicator:
 
     def __init__(self,cache):
-        self.a = appindicator.Indicator('appmenu', os.path.join(cwd,'appmenu.png'), appindicator.CATEGORY_APPLICATION_STATUS)
+        self.a = appindicator.Indicator('appmenu', self.lookupIcon('preferences-desktop-remote-desktop'), appindicator.CATEGORY_APPLICATION_STATUS)
         self.a.set_status( appindicator.STATUS_ACTIVE )
         self.cache=cache        
         self.appdict=self.cache.get_cache()        
